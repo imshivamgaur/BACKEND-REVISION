@@ -1,0 +1,2 @@
+{"level":"\u001b[33mwarn\u001b[39m","message":"A new requst is made on add tea route","timestamp":"2025-03-16T13:29:04.125Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/add-movie\",\"status\":\"200\",\"responseTime\":\"2.734\"}","timestamp":"2025-03-16T13:29:04.128Z"}

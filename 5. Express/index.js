@@ -1,14 +1,35 @@
 import express from "express";
+import logger from "./logger.js";
+import morgan from "morgan";
 
 const app = express();
 const PORT = 3000;
 app.use(express.json());
+
+// custom logger
+const morganFormat = ":method :url :status :response-time ms";
+app.use(
+  morgan(morganFormat, {
+    stream: {
+      write: (message) => {
+        const logObject = {
+          method: message.split(" ")[0],
+          url: message.split(" ")[1],
+          status: message.split(" ")[2],
+          responseTime: message.split(" ")[3],
+        };
+        logger.info(JSON.stringify(logObject));
+      },
+    },
+  })
+);
 
 let movieData = [];
 let nextId = 1;
 
 // Add movie
 app.post("/add-movie", (req, res) => {
+  logger.warn("A new requst is made on add tea route")
   let { name } = req.body;
   let newMovie = { id: nextId++, name: name };
   movieData.push(newMovie);
