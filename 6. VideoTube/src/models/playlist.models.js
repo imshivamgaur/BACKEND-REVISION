@@ -13,16 +13,6 @@ import mongoose, { Schema } from "mongoose";
 
 const playlistSchema = new Schema(
   {
-    owner: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-    },
-    videos: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Video",
-      },
-    ],
     name: {
       type: String,
       required: true,
@@ -30,6 +20,16 @@ const playlistSchema = new Schema(
     description: {
       type: String,
       required: true,
+    },
+    videos: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Video",
+      },
+    ],
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
     },
   },
   { timestamps: true }

@@ -1,3 +1,5 @@
+import mongoose, { Schema } from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 /*
   owner ObjectId users
   videoFile string
@@ -8,8 +10,6 @@
   views number
   isPublished boolean
 */
-
-import mongoose, { Schema } from "mongoose";
 
 const videoSchema = new Schema(
   {
@@ -36,7 +36,7 @@ const videoSchema = new Schema(
     views: {
       type: Number,
       default: 0,
-    }, 
+    },
     isPublished: {
       type: Boolean,
       default: true,
@@ -48,5 +48,7 @@ const videoSchema = new Schema(
   },
   { timestamps: true }
 );
+
+videoSchema.plugin(mongooseAggregatePaginate);
 
 export const VideoSchema = mongoose.model("Video", videoSchema);

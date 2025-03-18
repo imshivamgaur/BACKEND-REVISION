@@ -8,14 +8,14 @@ import mongoose, { Schema } from "mongoose";
   updatedAt Date
 */
 
-const subsriptionSchema = new Schema(
+const subscriptionSchema = new Schema(
   {
-    channel: {
-      type: Schema.Types.ObjectId,
+    subscriber: {
+      type: Schema.Types.ObjectId, //one who IS SUBSCRIBING
       ref: "User",
     },
-    subscriber: {
-      type: Schema.Types.ObjectId,
+    channel: {
+      type: Schema.Types.ObjectId, // one to whom you "subscriber" is SUBSCRIBING
       ref: "User",
     },
   },
@@ -24,7 +24,7 @@ const subsriptionSchema = new Schema(
   }
 );
 
-export const SubsriptionSchema = mongoose.model(
+export const SubscriptionSchema = mongoose.model(
   "Subscription",
-  subsriptionSchema
+  subscriptionSchema
 );
