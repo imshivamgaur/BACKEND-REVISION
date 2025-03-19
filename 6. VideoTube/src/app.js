@@ -25,17 +25,17 @@ app.use("/api/v1/healthcheck", healthCheckRouter);
 app.use("/api/v1/users", userRouter);
 
 // Global error response
-// app.use((err, req, res, next) => {
-//   // console.error("🚨 Error:", err); // Debugging
-//   const statusCode = err.statusCode || 500;
-//   if (err) {
-//     return res.status(statusCode).json({
-//       statusCode,
-//       data: err.data || null,
-//       message: err.message,
-//       success: false,
-//     });
-//   }
-// });
+app.use((err, req, res, next) => {
+  // console.error("🚨 Error:", err); // Debugging
+  const statusCode = err.statusCode || 500;
+  if (err) {
+    return res.status(statusCode).json({
+      statusCode,
+      data: err.data || null,
+      message: err.message,
+      success: false,
+    });
+  }
+});
 
 export { app };
