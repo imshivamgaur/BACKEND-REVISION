@@ -6,6 +6,7 @@ import {
   deleteFromCloudinary,
 } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import fs from "fs";
 
 const registerUser = asyncHandler(async (req, res) => {
   // from req.body
@@ -26,19 +27,18 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 
   if (existedUser) {
+    deleteTempFiles(req.files);
     throw new ApiError(409, "User with email or username already exists");
   }
-
-  console.log("you reached here")
 
   const avatarLocalPath = req.files?.avatar?.[0]?.path;
   const coverLocalPath = req.files?.coverImage?.[0]?.path;
 
   if (!avatarLocalPath) {
+    deleteTempFiles(req.files);
     throw new ApiError(400, "Avatar file is missing");
   }
 
-  
   // const avatar = await uploadOnCloundinary(avatarLocalPath);
   // let coverImage = "";
   // if (coverLocalPath) {
@@ -48,19 +48,22 @@ const registerUser = asyncHandler(async (req, res) => {
   let avatar;
   try {
     avatar = await uploadOnCloundinary(avatarLocalPath);
-    console.log("Uploaded avatar", avatar);
   } catch (error) {
     console.log("Error uploading avatar", error);
+    deleteTempFiles(req.files); // Ensure temp files are deleted if upload fails
     throw new ApiError(500, "Failed to upload avatar");
   }
 
-  let coverImage;
-  try {
-    coverImage = await uploadOnCloundinary(coverLocalPath);
-    console.log("Uploaded coverImage", coverImage);
-  } catch (error) {
-    console.log("Error uploading coverImage", error);
-    throw new ApiError(500, "Failed to upload coverImage");
+  let coverImage = "";
+  if (coverLocalPath) {
+    try {
+      coverImage = await uploadOnCloundinary(coverLocalPath);
+      console.log("Uploaded coverImage", coverImage);
+    } catch (error) {
+      console.log("Error uploading coverImage", error);
+      deleteTempFiles(req.files); // Ensure temp files are deleted if upload fails
+      throw new ApiError(500, "Failed to upload coverImage");
+    }
   }
 
   try {
@@ -82,6 +85,8 @@ const registerUser = asyncHandler(async (req, res) => {
       throw new ApiError(500, "Something went wrong while registering a user");
     }
 
+    deleteTempFiles(req.files); // ✅ Delete temp files after successful DB operation
+
     return res
       .status(201)
       .json(new ApiResponse(201, createUser, "User registed successfully"));
@@ -95,11 +100,23 @@ const registerUser = asyncHandler(async (req, res) => {
       await deleteFromCloudinary(coverImage.public_id);
     }
 
+    deleteTempFiles(req.files); // ✅ Ensure temp files are deleted even if user creation fails
+
     throw new ApiError(
       500,
       "Something went wrong while registering a user and images were deleted"
     );
   }
 });
+
+// ✅ Utility function to delete temp files
+const deleteTempFiles = (files) => {
+  try {
+    if (files?.avatar?.[0]?.path) fs.unlinkSync(files.avatar[0].path);
+    if (files?.coverImage?.[0]?.path) fs.unlinkSync(files.coverImage[0].path);
+  } catch (err) {
+    // console.error("Error deleting temp files", err);
+  }
+};
 
 export { registerUser };
