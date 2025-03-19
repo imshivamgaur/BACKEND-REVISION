@@ -64,7 +64,7 @@ const userSchema = new Schema(
 
 // Encrypting the password just before saving to the db with bcrypt.
 userSchema.pre("save", async function (next) {
-  if (!this.modified("password")) return next();
+  if (!this.isModified("password")) return next();
 
   this.password = await bcrypt.hash(this.password, 10);
 
@@ -91,7 +91,7 @@ userSchema.methods.generateAccessToken = function () {
 };
 
 userSchema.methods.generateRefreshToken = function () {
-  // short lived access token -JWT
+  // short lived access token - JWT
   jwt.sign(
     {
       _id: this._id,
