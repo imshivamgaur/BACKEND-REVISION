@@ -9,7 +9,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import fs from "fs";
 import jwt from "jsonwebtoken";
 
-// generating the token for user
+// TODO generating the token for user
 const generateAccessAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -31,6 +31,7 @@ const generateAccessAndRefreshToken = async (userId) => {
   }
 };
 
+// TODO Register user
 const registerUser = asyncHandler(async (req, res) => {
   // from req.body
   const { fullName, username, email, password } = req.body;
@@ -132,6 +133,7 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
+// TODO Login user
 const loginUser = asyncHandler(async (req, res) => {
   // get data from body
   const { username, email, password } = req.body;
@@ -200,6 +202,7 @@ const loginUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, loggedInUser, "User logged in successfully"));
 });
 
+// TODO Logout user
 const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
@@ -223,6 +226,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User logged out successfully"));
 });
 
+// TODO ChangePassword
 const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
@@ -255,12 +259,17 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "Password changed successfully"));
 });
 
+// TODO Get user details
 const getCurrentUserDetails = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).select(
+    "-password -refreshToken"
+  );
   return res
     .status(200)
-    .json(new ApiResponse(200, req.user, "Current user details"));
+    .json(new ApiResponse(200, user, "Current user details"));
 });
 
+// TODO Update Account details
 const updateAccountDetails = asyncHandler(async (req, res) => {
   const { username, fullName, email } = req.body;
 
@@ -296,6 +305,71 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "Account details updated successfully"));
 });
 
+// TODO Update user Avatar
+const updateUserAvatar = asyncHandler(async (req, res) => {
+  // console.log(req.file)
+  const avatarLocalPath = req.file?.path;
+
+  if (!avatarLocalPath) {
+    throw new ApiError(400, "File is required");
+  }
+
+  const avatar = await uploadOnCloundinary(avatarLocalPath);
+
+  if (!avatar.url) {
+    throw new ApiError("Something went wrong while uploading avatar");
+  }
+
+  let user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        avatar: avatar.url,
+      },
+    },
+    {
+      new: true,
+    }
+  ).select("-password -refreshToken");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "Avatar updated successfully"));
+});
+
+// TODO Update user Cover-Image
+const updateUserCoverImage = asyncHandler(async (req, res) => {
+  // console.log(req.file)
+  const coverImageLocalPath = req.file?.path;
+
+  if (!coverImageLocalPath) {
+    throw new ApiError(400, "File is required");
+  }
+
+  const coverImage = await uploadOnCloundinary(coverImageLocalPath);
+
+  if (!coverImage.url) {
+    throw new ApiError("Something went wrong while uploading cover-image");
+  }
+
+  let user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        coverImage: coverImage.url,
+      },
+    },
+    {
+      new: true,
+    }
+  ).select("-password -refreshToken");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "Cover-image updated successfully"));
+});
+
+// TODO Refresh Access and Refresh token
 const refreshAccessToken = asyncHandler(async (req, res) => {
   // grabbing the refresh token from cookie
   const incomingRefreshToken =
@@ -357,4 +431,7 @@ export {
   logoutUser,
   changeCurrentPassword,
   updateAccountDetails,
+  getCurrentUserDetails,
+  updateUserAvatar,
+  updateUserCoverImage,
 };
