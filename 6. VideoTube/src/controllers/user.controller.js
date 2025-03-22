@@ -43,6 +43,9 @@ const registerUser = asyncHandler(async (req, res) => {
       (field) => !field || String(field)?.trim() === ""
     )
   ) {
+    if (req.files?.avatar?.[0].path) fs.unlinkSync(req.files.avatar[0].path);
+    if (req.files?.coverImage?.[0]?.path)
+      fs.unlinkSync(req.files.coverImage[0].path);
     throw new ApiError(400, "All fields are required");
   }
 
